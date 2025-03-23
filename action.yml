@@ -1,0 +1,41 @@
+name: Release on my server
+
+inputs:
+  ssh_private_key:
+    required: true
+  ssh_user:
+    required: true
+  ssh_host:
+    required: true
+  service_name:
+    required: true
+  docker_compose_path:
+    required: true
+  github_pat:
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > "$SSH_PRIVATE_KEY_FILE"
+        chmod 600 "$SSH_PRIVATE_KEY_FILE"
+        ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+      shell: bash
+      env:
+        SSH_PRIVATE_KEY: ${{ inputs.ssh_private_key }}
+    - name: Execute SSH Command
+      run: |
+        ssh -o BatchMode=yes -i "$SSH_PRIVATE_KEY_FILE" \
+          "$SSH_USER"@"$SSH_HOST" \
+          'cd ${{ inputs.docker_compose_path }}/${{ inputs.service_name }} \
+            ; git pull https://${{ github.repository_owner }}:${{ inputs.github_pat }}@github.com/${{ github.repository }} main \
+            ; cd ${{ inputs.docker_compose_path }} \
+            ; docker compose --progress quite up --build -d ${{ inputs.service_name }}'
+      shell: bash
+  env:
+    SSH_PRIVATE_KEY_FILE: ~/.ssh/id_rsa
+    SSH_USER: ${{ inputs.ssh_user }}
+    SSH_HOST: ${{ inputs.ssh_host }}
