@@ -80,4 +80,4 @@ runs:
         script: |
           SERVICE_NAME=$(echo "${{ inputs.service-name }}" | tr '[:lower:] -' '[:upper:]__' | sed 's/_\+/_/g')
           sed -i "s|^${SERVICE_NAME}_IMAGE_DIGEST=.*|${SERVICE_NAME}_IMAGE_DIGEST=${{ steps.build.outputs.digest }}|" .env
-          docker compose up --progress quiet -d --no-deps ${{ inputs.service-name }}
+          docker compose up -d --no-deps ${{ inputs.service-name }}
