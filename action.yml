@@ -25,11 +25,22 @@ inputs:
   ssh-port:
     required: false
     default: "22"
+  submodules:
+    required: false
+    default: "false"
+    description: Submodule checkout mode for actions/checkout
+  fetch-depth:
+    required: false
+    default: "1"
+    description: Number of commits to fetch for actions/checkout
 
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
+      with:
+        submodules: ${{ inputs.submodules }}
+        fetch-depth: ${{ inputs.fetch-depth }}
 
     - uses: docker/setup-buildx-action@v3
 
