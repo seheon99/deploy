@@ -117,7 +117,7 @@ jobs:
       - name: Deploy service
         uses: your-org/docker-service-cd@v1
         with:
-          image-name: ghcr.io/your-org/your-service
+          registry: ghcr.io/your-org/your-service
           service-name: portfolio
           ssh-host: ${{ secrets.SSH_HOST }}
           ssh-user: ${{ secrets.SSH_USER }}
@@ -129,14 +129,16 @@ jobs:
 
 | Name           | Required | Default | Description                                            |
 | -------------- | -------- | ------- | ------------------------------------------------------ |
-| `image-name`   | ✅        | —       | Full Docker image reference (e.g. `ghcr.io/user/repo`) |
-| `service-name` | ✅        | —       | Docker Compose service name                            |
+| `skip-checkout` | ❌        | `false` | Skip the repository checkout step                      |
 | `dry-run`      | ❌        | `false` | Run pipeline without pushing or deploying              |
-| `ssh-host`     | ✅        | —       | SSH host for deployment                                |
-| `ssh-user`     | ✅        | —       | SSH username                                           |
-| `ssh-key`      | ✅        | —       | Private SSH key                                        |
+| `registry`     | ✅*       | —       | Image name (e.g. `ghcr.io/user/repo`)                  |
+| `service-name` | ✅*       | —       | Docker Compose service name                            |
+| `ssh-host`     | ✅*       | —       | SSH host for deployment                                |
+| `ssh-user`     | ✅*       | —       | SSH username                                           |
+| `ssh-key`      | ✅*       | —       | Private SSH key                                        |
 | `ssh-port`     | ❌        | `22`    | SSH port                                               |
 
+✅* Required when `dry-run` is not `true`. In `dry-run` mode these inputs may be omitted.
 
 ## 🧪 Dry Run Mode
 

@@ -16,18 +16,18 @@ inputs:
     description: Run pipeline without pushing or deploying artifacts
 
   registry:
-    required: true
+    required: false
     description: Image name (e.g. ghcr.io/user/repo)
   service-name:
-    required: true
+    required: false
     description: Docker Compose service name
 
   ssh-host:
-    required: true
+    required: false
   ssh-user:
-    required: true
+    required: false
   ssh-key:
-    required: true
+    required: false
   ssh-port:
     required: false
     default: "22"
@@ -35,6 +35,21 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Validate required inputs (non dry-run)
+      if: inputs.dry-run != 'true'
+      shell: bash
+      run: |
+        missing=()
+        [[ -z "${{ inputs.registry }}" ]] && missing+=("registry")
+        [[ -z "${{ inputs.service-name }}" ]] && missing+=("service-name")
+        [[ -z "${{ inputs.ssh-host }}" ]] && missing+=("ssh-host")
+        [[ -z "${{ inputs.ssh-user }}" ]] && missing+=("ssh-user")
+        [[ -z "${{ inputs.ssh-key }}" ]] && missing+=("ssh-key")
+        if (( ${#missing[@]} )); then
+          echo "Missing required inputs for non-dry-run: ${missing[*]}" >&2
+          exit 1
+        fi
+
     - if: inputs.skip-checkout != 'true'
       uses: actions/checkout@v6
       with:
@@ -49,7 +64,8 @@ runs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
 
-    - id: meta
+    - if: inputs.dry-run != 'true'
+      id: meta
       uses: docker/metadata-action@v5
       with:
         images: ${{ inputs.registry }}
