@@ -4,6 +4,12 @@ description: >
   and remotely deploy services via docker-compose over SSH.
 
 inputs:
+  skip-checkout:
+    required: false
+    default: "false"
+    description: >
+      Skip the repository checkout step;
+      assumes the caller already checked out the repo and prepared the workspace
   dry-run:
     required: false
     default: "false"
@@ -26,15 +32,11 @@ inputs:
     required: false
     default: "22"
 
-  submodules:
-    required: false
-    default: "false"
-    description: Submodule checkout mode for actions/checkout
-
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v6
+    - if: inputs.skip-checkout != 'true'
+      uses: actions/checkout@v6
       with:
         submodules: ${{ inputs.submodules }}
 
